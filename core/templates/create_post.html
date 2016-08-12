@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Post</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+<body>
+	<header>
+  		<div class="container">
+   			<div class="header-top clearfix">
+    			<div class="logo">
+     				<a href="/"><img src="/img/logo_attractor.png" height="56" width="154" alt="IT-Attractor"></a>
+    			</div>
+                {% if login %}
+    			    <a href="/logout/" class="auth">Выйти</a>
+                {% else %}
+    			    <a href="/login/" class="auth">Login</a>
+    			    <a href="/signup/" class="auth">Register</a>
+    			{% end %}
+                <nav class="main__nav">
+     				<ul>
+      					<li><a href="/">Home</a></li>
+      					<li><a href="#">Coming soon</a></li>
+      					<li><a href="#">Coming soon</a></li>
+
+     				</ul>
+    			</nav>
+   			</div><!--/header-top-->
+  		</div>
+	</header>
+    <section>
+        <div class="container">
+            <div class="login_box">
+                <form method="post" action="/create/" enctype="multipart/form-data">
+                    <label class="form__label">Title for Post</label>
+                    <input type="text" name="title" class="form__input"/>
+                    <label class="form__label">Text for post</label>
+                    <textarea name="description" id="" cols="30" rows="10" class="form__input"></textarea>
+                    <input type="file" name="picture" class="form__input">
+                    <button class="form__btn" type="submit">CREATE POST</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

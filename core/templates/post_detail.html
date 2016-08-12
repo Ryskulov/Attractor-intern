@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
+<body>
+	<header>
+  		<div class="container">
+   			<div class="header-top clearfix">
+    			<div class="logo">
+     				<a href="/"><img src="/img/logo_attractor.png" height="56" width="154" alt="IT-Attractor"></a>
+    			</div>
+				{% if login %}
+    				<a href="/logout/" class="auth">Выйти</a>
+    			{% else %}
+    				<a href="/login/" class="auth">Логин</a>
+					<a href="/signup/" class="auth">Регистрация</a>
+				{% end %}
+    			<nav class="main__nav">
+     				<ul>
+      					<li><a href="#">Home</a></li>
+                        {% if post_edit %}
+      					    <li><a href="{{ link_post_edit }}">Редактирование</a></li>
+      					    <li><a href="{{ link_post_delete }}">Удалить</a></li>
+
+                        {% end %}
+
+     				</ul>
+    			</nav>
+   			</div><!--/header-top-->
+  		</div>
+	</header>
+    <section>
+        <div class="container">
+            <div class="post__detail">
+                <img src="{{ picture }}" alt="" class="post__img">
+                <span class="post__title">{{ title }}</span>
+                <p class="post__description">{{ description }}</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

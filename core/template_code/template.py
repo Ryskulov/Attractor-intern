@@ -1,0 +1,340 @@
+import cgi
+import collections
+import os
+import re
+import operator
+import ast
+
+from exceptions import TemplateError, TemplateContextError, TemplateSyntaxError
+from settings import TEMPLATES_DIR
+
+VAR_FRAGMENT = 0
+OPEN_BLOCK_FRAGMENT = 1
+CLOSE_BLOCK_FRAGMENT = 2
+TEXT_FRAGMENT = 3
+
+VAR_TOKEN_START = '{{'
+VAR_TOKEN_END = '}}'
+BLOCK_TOKEN_START = '{%'
+BLOCK_TOKEN_END = '%}'
+
+TOK_REGEX = re.compile(r"(%s.*?%s|%s.*?%s)" % (
+    VAR_TOKEN_START,
+    VAR_TOKEN_END,
+    BLOCK_TOKEN_START,
+    BLOCK_TOKEN_END
+))
+
+WHITESPACE = re.compile('\s+')
+
+operator_lookup_table = {
+    '<': operator.lt,
+    '>': operator.gt,
+    '==': operator.eq,
+    '!=': operator.ne,
+    '<=': operator.le,
+    '>=': operator.ge
+}
+
+
+class Template(object):
+    def __init__(self, template_path, context):
+        self.context = dict()
+
+        with open(os.path.join(TEMPLATES_DIR, template_path), 'r') as template_file:
+            self.template = template_file.read()
+
+        for key, value in context.items():
+            if isinstance(value, collections.Iterable):
+                value = ''.join(value)
+            self.context[key] = value
+
+    def render(self):
+        return self.template.format(**self.context)
+
+
+def gete_parse_url(main_url):
+    GET_parametr = []
+    if len(main_url.split("?")) > 1:
+        main_url, url = main_url.split("?")[0], main_url.split("?")[1]
+        result = url.split("&")
+        for i in range(len(result)):
+            GET_parametr.append(str(result[i].split("=")[1]))
+    return main_url, GET_parametr
+
+
+def post(request):
+    ctype, pdict = cgi.parse_header(request.headers['content-type'])
+    if ctype == 'multipart/form-data':
+        postvars = {}
+        pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
+        postvars = cgi.parse_multipart(request.rfile, pdict)
+        user_attribute = dict()
+        if len(postvars):
+            for key in postvars:
+                if key != "picture":
+                    user_attribute[key] = postvars[key][0].decode("utf-8")
+                else:
+                    user_attribute[key] = postvars[key][0]
+        return user_attribute
+    elif ctype == 'application/x-www-form-urlencoded':
+        length = int(request.headers['content-length'])
+        postvars = cgi.parse_qs(request.rfile.read(length), keep_blank_values=1)
+        user_attribute = dict()
+        if len(postvars):
+            for key, value in postvars.items():
+                user_attribute[key.decode("utf-8")] = value[0].decode("utf-8")
+        return user_attribute
+    else:
+        postvars = {}
+
+def eval_expression(expr):
+    try:
+        return 'literal', ast.literal_eval(expr)
+    except ValueError or SyntaxError:
+        return 'name', expr
+
+
+def resolve(name, context):
+    if name.startswith('..'):
+        context = context.get('..', {})
+        name = name[2:]
+    try:
+        for tok in name.split('.'):
+            context = context[tok]
+        return context
+    except KeyError:
+        raise TemplateContextError(name)
+
+
+class _Fragment(object):
+    def __init__(self, raw_text):
+        self.raw = raw_text
+        self.clean = self.clean_fragment()
+
+    def clean_fragment(self):
+        if self.raw[:2] in (VAR_TOKEN_START, BLOCK_TOKEN_START):
+            return self.raw.strip()[2:-2].strip()
+        return self.raw
+
+    @property
+    def type(self):
+        raw_start = self.raw[:2]
+        if raw_start == VAR_TOKEN_START:
+            return VAR_FRAGMENT
+        elif raw_start == BLOCK_TOKEN_START:
+            return CLOSE_BLOCK_FRAGMENT if self.clean[:3] == 'end' else OPEN_BLOCK_FRAGMENT
+        else:
+            return TEXT_FRAGMENT
+
+
+class _Node(object):
+    creates_scope = False
+
+    def __init__(self, fragment=None):
+        self.children = []
+        self.process_fragment(fragment)
+
+    def process_fragment(self, fragment):
+        pass
+
+    def enter_scope(self):
+        pass
+
+    def render(self, context):
+        pass
+
+    def exit_scope(self):
+        pass
+
+    def render_children(self, context, children=None):
+        if children is None:
+            children = self.children
+
+        def render_child(child):
+            child_html = child.render(context)
+            return '' if not child_html else str(child_html)
+
+        return ''.join(map(render_child, children))
+
+
+class _ScopableNode(_Node):
+    creates_scope = True
+
+
+class _Root(_Node):
+    def render(self, context):
+        return self.render_children(context)
+
+
+class _Variable(_Node):
+    def process_fragment(self, fragment):
+        self.name = fragment
+
+    def render(self, context):
+        return resolve(self.name, context)
+
+
+class _Each(_ScopableNode):
+    def process_fragment(self, fragment):
+        try:
+            _, it = WHITESPACE.split(fragment, 1)
+            self.it = eval_expression(it)
+        except ValueError:
+            raise TemplateSyntaxError(fragment)
+
+    def render(self, context):
+        items = self.it[1] if self.it[0] == 'literal' else resolve(self.it[1], context)
+
+        def render_item(item):
+            return self.render_children({'..': context, 'it': item})
+
+        return ''.join(map(render_item, items))
+
+
+class _If(_ScopableNode):
+    def process_fragment(self, fragment):
+        bits = fragment.split()[1:]
+        if len(bits) not in (1, 3):
+            raise TemplateSyntaxError(fragment)
+        self.lhs = eval_expression(bits[0])
+        if len(bits) == 3:
+            self.op = bits[1]
+            self.rhs = eval_expression(bits[2])
+
+    def render(self, context):
+        lhs = self.resolve_side(self.lhs, context)
+        if hasattr(self, 'op'):
+            op = operator_lookup_table.get(self.op)
+            if op is None:
+                raise TemplateSyntaxError(self.op)
+            rhs = self.resolve_side(self.rhs, context)
+            exec_if_branch = op(lhs, rhs)
+        else:
+            exec_if_branch = operator.truth(lhs)
+        if_branch, else_branch = self.split_children()
+        return self.render_children(context,
+                                    self.if_branch if exec_if_branch else self.else_branch)
+
+    def resolve_side(self, side, context):
+        return side[1] if side[0] == 'literal' else resolve(side[1], context)
+
+    def exit_scope(self):
+        self.if_branch, self.else_branch = self.split_children()
+
+    def split_children(self):
+        if_branch, else_branch = [], []
+        curr = if_branch
+        for child in self.children:
+            if isinstance(child, _Else):
+                curr = else_branch
+                continue
+            curr.append(child)
+        return if_branch, else_branch
+
+
+class _Else(_Node):
+    def render(self, context):
+        pass
+
+
+class _Call(_Node):
+    def process_fragment(self, fragment):
+        try:
+            bits = WHITESPACE.split(fragment)
+            self.callable = bits[1]
+            self.args, self.kwargs = self._parse_params(bits[2:])
+        except ValueError or IndexError:
+            raise TemplateSyntaxError(fragment)
+
+    def _parse_params(self, params):
+        args, kwargs = [], {}
+        for param in params:
+            if '=' in param:
+                name, value = param.split('=')
+                kwargs[name] = eval_expression(value)
+            else:
+                args.append(eval_expression(param))
+        return args, kwargs
+
+    def render(self, context):
+        resolved_args, resolved_kwargs = [], {}
+        for kind, value in self.args:
+            if kind == 'name':
+                value = resolve(value, context)
+            resolved_args.append(value)
+        for key, (kind, value) in self.kwargs.items():
+            if kind == 'name':
+                value = resolve(value, context)
+            resolved_kwargs[key] = value
+        resolved_callable = resolve(self.callable, context)
+        if hasattr(resolved_callable, '__call__'):
+            return resolved_callable(*resolved_args, **resolved_kwargs)
+        else:
+            raise TemplateError("'%s' is not a callable" % self.callable)
+
+
+class _Text(_Node):
+    def process_fragment(self, fragment):
+        self.text = fragment
+
+    def render(self, context):
+        return self.text
+
+
+class Compiler(object):
+    def __init__(self, template_string):
+        self.template_string = template_string
+
+    def each_fragment(self):
+        for fragment in TOK_REGEX.split(self.template_string):
+            if fragment:
+                yield _Fragment(fragment)
+
+    def compile(self):
+        root = _Root()
+        scope_stack = [root]
+        for fragment in self.each_fragment():
+            if not scope_stack:
+                raise TemplateError('nesting issues')
+            parent_scope = scope_stack[-1]
+            if fragment.type == CLOSE_BLOCK_FRAGMENT:
+                parent_scope.exit_scope()
+                scope_stack.pop()
+                continue
+            new_node = self.create_node(fragment)
+            if new_node:
+                parent_scope.children.append(new_node)
+                if new_node.creates_scope:
+                    scope_stack.append(new_node)
+                    new_node.enter_scope()
+        return root
+
+    def create_node(self, fragment):
+        node_class = None
+        if fragment.type == TEXT_FRAGMENT:
+            node_class = _Text
+        elif fragment.type == VAR_FRAGMENT:
+            node_class = _Variable
+        elif fragment.type == OPEN_BLOCK_FRAGMENT:
+            cmd = fragment.clean.split()[0]
+            if cmd == 'for':
+                node_class = _Each
+            elif cmd == 'if':
+                node_class = _If
+            elif cmd == 'else':
+                node_class = _Else
+            elif cmd == 'call':
+                node_class = _Call
+        if node_class is None:
+            raise TemplateSyntaxError(fragment)
+        return node_class(fragment.clean)
+
+
+class Templates(object):
+    def __init__(self, contents):
+        self.contents = contents
+        self.root = Compiler(contents).compile()
+
+    def render(self, **kwargs):
+        return self.root.render(kwargs)

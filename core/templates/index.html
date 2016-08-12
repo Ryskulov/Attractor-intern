@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru-Ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная станица блога написанного на Python</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<header>
+  		<div class="container">
+   			<div class="header-top clearfix">
+    			<div class="logo">
+     				<a href="#"><img src="/img/logo_attractor.png" height="56" width="154" alt="IT-Attractor"></a>
+    			</div>
+				{% if status %}
+    				<a href="/logout/" class="auth">Выйти</a>
+				{% else %}
+    				<a href="/login/" class="auth">Войти</a>
+    				<a href="/signup/" class="auth">Регистрация</a>
+				{% end %}
+    			<nav class="main__nav">
+     				<ul>
+      					<li><a href="#">Home</a></li>
+						{% if create_post %}
+	      					<li><a href="/create/">Создать пост</a></li>
+						{% end %}
+      					<!--<li><a href="#">Coming soon</a></li>-->
+
+     				</ul>
+    			</nav>
+   			</div><!--/header-top-->
+  		</div>
+	</header>
+    <section class="blog">
+		<div class="container">
+			{{ blog }}
+
+		</div>
+	</section>
+	<footer class="footer">
+		<div class="container">
+			<div class="footer__copyright"><p class="copyright__text">Copyright IT-Attractor Internship 2016 @Randomir, All right reserved.</p></div>
+		</div>
+	</footer>
+</body>
+</html>

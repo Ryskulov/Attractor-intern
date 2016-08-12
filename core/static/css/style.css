@@ -1,0 +1,245 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+}
+
+.clearfix:after {
+	clear: both;
+	content: "";
+	display: table;
+}
+/*Задаем clearfix родительскому блоку для floatБ так же можно использовать overflow hidden*/
+
+body {
+ 	font-family: 'Open Sans', arial, helvetica, sans-serif;
+ 	background: #fff;
+	color: black;
+	font-size: 14px;
+	line-height: 22px;
+	min-width: 960px;
+}
+
+button, input[type="button"], input[type="submit"] {
+	cursor: pointer;
+	outline: none;
+}
+
+.container {
+	width: 942px;
+	margin: 0 auto;
+	position: relative;
+	overflow: hidden;
+}
+
+header {
+	background: #312424;
+	height: 100px;
+	background-size: cover;
+	margin-bottom: 70px;
+}
+
+.header-top {
+	height: 120px;
+	padding-top: 30px;
+	margin-bottom: 163px;
+}
+
+.logo {
+	float: left;
+	margin-left: 3px;
+}
+
+.main__nav {
+	padding-top: 17px;
+	margin: 0 60px 0 329px;
+}
+
+nav ul {
+	list-style: none;
+}
+
+nav ul li {
+	display: inline-block;
+	margin: 0 23px 0 0;
+	padding-bottom: 14px;
+}
+
+nav a {
+	color: #fff;
+	text-decoration: none;
+	font-size: 18px;
+	font-weight: 300;
+}
+
+nav li:hover {
+	border-bottom: 3px solid #1abc9c;
+}
+
+nav a:active {
+	color: #1abc9c;
+}
+
+.auth {
+	color: #fff;
+	float: right;
+	font-size: 18px;
+	font-weight: bold;
+	text-decoration: none;
+	padding-top: 18px;
+	padding-bottom: 14px;
+    margin-left: 20px;
+}
+
+.auth:hover {
+	border-bottom: 3px solid #1abc9c;
+}
+
+.auth:active {
+	color: #1abc9c;
+}
+
+
+.blog {
+	margin-bottom: 87px;
+}
+
+.post__box {
+	width: 310px;
+	margin-right: 4px;
+	float: left;
+	display: inline-block;
+    margin-bottom: 30px;
+}
+
+.post__link {
+	color: #2c3e50;
+	text-decoration: none;
+	margin-bottom: 17px;
+	display: inline-block;
+	margin-left: 80px;
+	padding-top: 110px;
+    position: relative;
+}
+
+.post__link:hover {
+    color: #3c9687;
+    text-decoration: underline;
+}
+
+.post_picture {
+    position: absolute;
+    top: 0px;
+    left: -50px;
+}
+
+.post__text {
+	color: #2c3e50;
+	text-align: center;
+	font-size: 14px;
+	line-height: 19px;
+	font-weight: 300;
+    width: 300px;
+}
+
+.post__link strong {
+	padding-top: 110px;
+	font-weight: 400;
+	font-size: 20px;
+}
+
+.footer {
+	height: 193px;
+	background: #2c3e50;
+}
+
+.footer__copyright {
+	padding: 70px 0 0 255px;
+}
+.copyright__text {
+	color: #fff;
+	font-size: 16px;
+}
+
+
+/*LOGIN.HTML*/
+
+.login_box {
+    width: 200px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.login__form {
+    width: 300px;
+}
+
+.form__label {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.form__input {
+    width: 280px;
+    height: auto;
+	padding: 5px 5px 5px 5px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    color: #1abc9c;
+    font-size: 16px;
+}
+
+.form__btn {
+	width: 200px;
+	height: 40px;
+	display: inline-block;
+	background: #1abc9c;
+	text-decoration: none;
+	color: #fff;
+	font-size: 18px;
+	text-align: center;
+	border-radius: 5px;
+	margin-right: 10px;
+	font-weight: 400;
+}
+
+.form__btn:hover {
+	background: #169f84;
+}
+
+.form__btn:active {
+	border-bottom: 2px solid #414243;
+}
+
+
+/*BLOG DETAIL*/
+
+.post__detail {
+	width: 500px;
+	height: 100%;
+	margin: 0 auto;
+}
+
+.post__img {
+	width: 400px;
+	height: 200px;
+	margin: 0 auto;
+	margin-bottom: 30px;
+}
+
+.post__title {
+	font-size: 20px;
+	color: #000;
+	margin-bottom: 30px;
+	display: block;
+}
+
+.post__description {
+	font-size: 16px;
+	color: green;
+	margin-bottom: 30px;
+}
