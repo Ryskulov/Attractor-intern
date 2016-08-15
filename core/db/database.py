@@ -1,3 +1,5 @@
+# coding: utf-8
+
 class User:
     username = ['admin']
     password = ['admin']

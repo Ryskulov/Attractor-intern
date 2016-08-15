@@ -1,7 +1,5 @@
-class Blog:
-    id = []
-    title = []
-    description = []
-    picture = []
-    sid = []
-    id2 = []
+import unittest
+import views
+
+
+

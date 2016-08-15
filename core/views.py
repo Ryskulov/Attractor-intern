@@ -237,15 +237,20 @@ def post_detail(request):
 
 def post_edit(request):
     db = DataAccessLayer()
+    cookie = Cookie
     id = request.path.split('/')[-2]
     title, description, picture, sid = db.EditPostById(int(id))
-    edit_post_html = '<form method="POST" action="/update/" class="login__form" enctype="multipart/form-data">'
-    edit_post_html += '<input type="hidden" value="%s" name="id" class="form__input"/><br/>' % id
-    edit_post_html += '<input type="text" value="%s" name="title" class="form__input"/><br/>' % title
-    edit_post_html += '<textarea cols="50" rows="10" id="description" name="description" class="form__input">%s</textarea> <br/>' % description
-    edit_post_html += '<input type="file" name="picture" class="form__input"/> <br/>'
-    edit_post_html += '<input type="submit" value="Update" class="form__btn" />'
-    edit_post_html += '</form>'
+    edit_post_html = ''
+    if cookie.get_cookie.get('session') == sid:
+        edit_post_html += '<form method="POST" action="/update/" class="login__form" enctype="multipart/form-data">'
+        edit_post_html += '<input type="hidden" value="%s" name="id" class="form__input"/><br/>' % id
+        edit_post_html += '<input type="text" value="%s" name="title" class="form__input"/><br/>' % title
+        edit_post_html += '<textarea cols="50" rows="10" id="description" name="description" class="form__input">%s</textarea> <br/>' % description
+        edit_post_html += '<input type="file" name="picture" class="form__input"/> <br/>'
+        edit_post_html += '<input type="submit" value="Update" class="form__btn" />'
+        edit_post_html += '</form>'
+    else:
+        edit_post_html += '<h1>HAHAHAHA</h1>'
     f = open(settings.TEMPLATES_DIR + '/post_edit.html')
     read = f.read()
     html = Templates(read).render(post_edit=edit_post_html)
