@@ -4,7 +4,7 @@ from router import Router
 from urls import patterns
 
 
-class myHandler(BaseHTTPRequestHandler):
+class MyHandler(BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
         self.router = Router()
         self.router.register_routes(patterns)

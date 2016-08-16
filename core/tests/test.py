@@ -8,12 +8,12 @@ class TestUser(unittest.TestCase):
     def setUp(self):
         self.user = User()
 
-    def tearDown(self):
-        del self.user
+    # def tearDown(self):
+    #     del self.user
 
-    def test_create(self):
-        result = self.user.CreateLogin('randomir', 'password', 'Name', 'chingizkg@gmail.com')
-        self.assertEqual(result, 'randomir', 'password', 'Name', 'chingizkg@gmail.com')
+    def test_create_user(self):
+        self.user.create_login('randomir', 'password', 'Name', 'chingizkg@gmail.com')
+        self.assertAlmostEquals(self.user.username[1], 'randomir')
 
 
 if __name__ == '__main__':

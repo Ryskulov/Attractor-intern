@@ -1,19 +1,20 @@
 # coding: utf-8
 
+
 class User:
     username = ['admin']
     password = ['admin']
     first_name = []
     email = []
 
-    def CreateLogin(self, username, password, first_name, email):
+    def create_login(self, username, password, first_name, email):
         self.username.append(username)
         self.password.append(password)
         self.first_name.append(first_name)
         self.email.append(email)
         print (self.username)
 
-    def CheckUserIsExist(self, username, password):
+    def check_user_is_exist(self, username, password):
         if username in self.username:
             index_username = self.username.index(username)
             if self.password[index_username] == password:
@@ -42,9 +43,8 @@ class Blog:
     sid = ['bace070115e3514497c547487d543032',
            'bace070115e3514497c547487d543032',
            'bace070115e3514497c547487d543032']
-    print( '%s ddadadadsa' % id)
 
-    def CreateBlog(self, id, title, description, picture, sid):
+    def create_blog(self, id, title, description, picture, sid):
         self.id.append(id)
         self.title.append(title)
         self.description.append(description)
@@ -52,8 +52,7 @@ class Blog:
         self.sid.append(sid)
         print('CREATE POST %s' % self.sid)
 
-
-    def GetBlogById(self, id):
+    def get_blog_by_id(self, id):
         if not id in self.id:
             return 'Error %s' % id
         else:
@@ -65,17 +64,16 @@ class Blog:
 
 
 class Cookie:
-    get_cookie = {}
+    cookie_dict = {}
 
-    def CreateCookie(self, cookie_key, cookie_value):
-        self.get_cookie[cookie_key] = cookie_value
-        print('wwwwww %s' % self.get_cookie)
+    def create_cookie(self, cookie_key, cookie_value):
+        self.cookie_dict[cookie_key] = cookie_value
 
-    def GetCookie(self, cookie_key, cookie_value):
-        self.get_cookie[cookie_key] = cookie_value
+    def get_cookie(self, cookie_key, cookie_value):
+        self.cookie_dict[cookie_key] = cookie_value
 
-    def __get__(self, instance, owner):
-        return self.get_cookie
+    def __get__(self):
+        return self.cookie_dict
 
 
 class DataAccessLayer:
@@ -83,31 +81,31 @@ class DataAccessLayer:
         self.user = User()
         self.blog = Blog()
 
-    def CreateUser(self, username, password, first_name, email):
-        self.user.CreateLogin(username, password, first_name, email)
+    def create_user(self, username, password, first_name, email):
+        self.user.create_login(username, password, first_name, email)
 
-    def CheckUserIsExist(self, username, password):
-        return self.user.CheckUserIsExist(username, password)
+    def check_user_is_exist(self, username, password):
+        return self.user.check_user_is_exist(username, password)
 
-    def CreatePost(self, id, title, description, picture, sid):
-        self.blog.CreateBlog(id, title, description, picture, sid)
+    def create_post(self, id, title, description, picture, sid):
+        self.blog.create_blog(id, title, description, picture, sid)
 
-    def GetPostById(self, id):
-        return self.blog.GetBlogById(id)
+    def get_post_by_id(self, id):
+        return self.blog.get_blog_by_id(id)
 
-    def GetTitlePost(self):
+    def get_title_post(self):
         return self.blog.title
 
-    def getUserName(self):
+    def get_username(self):
         return self.user.username
 
-    def createid(self):
+    def create_id(self):
         b = self.blog.id.pop()
         self.blog.id.append(b)
         id = b + 1
         return id
 
-    def getAllPost(self):
+    def get_all_post(self):
         if len(self.blog.id) >= 1:
             return self.blog
         else:
@@ -117,12 +115,11 @@ class DataAccessLayer:
             self.blog.picture.append('/static/uploads/danger.jpg')
             self.blog.sid.append('fadfasdfa342123311312')
 
-    def getpostid(self, id):
+    def get_post_id(self, id):
         id = self.blog.id.index(id)
-        print(id)
         return id
 
-    def EditPostById(self, id):
+    def edit_post_by_id(self, id):
         if not id in self.blog.id:
             return "error %s " % id
         else:
@@ -133,7 +130,7 @@ class DataAccessLayer:
             sid = self.blog.sid[blog_index_id]
             return title, description, picture, sid
 
-    def updatePostById(self, id, title, description, picture):
+    def update_post_by_id(self, id, title, description, picture):
 
         if not id in self.blog.id:
             blog_index_id = self.blog.id.index(int(id))
@@ -144,11 +141,9 @@ class DataAccessLayer:
         else:
             return "error %s " % id
 
-    def deletePostById(self, id):
+    def delete_post_by_id(self, id):
         blog_index_id = self.blog.id.index(int(id))
         del self.blog.id[blog_index_id]
         del self.blog.description[blog_index_id]
         del self.blog.title[blog_index_id]
         del self.blog.picture[blog_index_id]
-
-    # def check_cookie(self):

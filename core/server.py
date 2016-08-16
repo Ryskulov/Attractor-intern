@@ -1,12 +1,12 @@
 from http.server import HTTPServer
 
-from handler import myHandler
+from handler import MyHandler
 
 PORT_NUMBER = 8080
 
 try:
 
-    server = HTTPServer(('', PORT_NUMBER), myHandler)
+    server = HTTPServer(('', PORT_NUMBER), MyHandler)
     print('Started httpserver on port ', PORT_NUMBER)
 
     server.serve_forever()

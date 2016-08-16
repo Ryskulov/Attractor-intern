@@ -10,10 +10,13 @@ class TestUser(unittest.TestCase):
     def tearDown(self):
         del self.user
 
-    def test_create(self):
-        result = self.user.CreateLogin('randomir', 'password', 'Name', 'chingizkg@gmail.com')
-        self.assertEqual(result, 'randomir', 'password', 'Name', 'chingizkg@gmail.com')
+    def test_create_login(self):
+        self.user.create_login('randomir', 'password', 'Name', 'chingizkg@gmail.com')
+        self.assertEqual(self.user.username[1], 'randomir')
 
+    def test_create_password(self):
+        self.user.create_login('randomir', 'password', 'Name', 'chingizkg@gmail.com')
+        self.assertEqual(self.user.password[1], 'password')
 
 if __name__ == '__main__':
     unittest.main()
