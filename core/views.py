@@ -159,7 +159,7 @@ def logout(request):
 
 def create_post_render(request):
     cookie = Cookie
-    f = open(settings.TEMPLATES_DIR + '/create_post_render.html')
+    f = open(settings.TEMPLATES_DIR + '/create_post.html')
     read = f.read()
     if cookie.cookie_dict.get('session'):
         login = True
@@ -184,7 +184,7 @@ def create_post(request):
     else:
         login = False
     id = db.create_id()
-    f = open(settings.TEMPLATES_DIR + '/create_post_render.html')
+    f = open(settings.TEMPLATES_DIR + '/create_post.html')
     read = f.read()
     request.send_response(HTTPStatus.SEE_OTHER)
     blog_attribute = post(request)
@@ -251,7 +251,7 @@ def post_edit_render(request):
         edit_post_html += '</form>'
     else:
         edit_post_html += '<h1>HAHAHAHA</h1>'
-    f = open(settings.TEMPLATES_DIR + '/post_edit_render.html')
+    f = open(settings.TEMPLATES_DIR + '/post_edit.html')
     read = f.read()
     html = Templates(read).render(post_edit=edit_post_html)
     request.send_response(HTTPStatus.OK)
@@ -264,7 +264,7 @@ def post_edit_render(request):
 def post_edit(request):
     context = {}
     db = DataAccessLayer()
-    html = Template('post_edit_render.html', context).render()
+    html = Template('post_edit.html', context).render()
     request.send_response(HTTPStatus.SEE_OTHER)
     blog_attribute = post(request)
     id = blog_attribute.get('id')
