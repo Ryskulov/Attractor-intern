@@ -44,7 +44,9 @@ class Url(object):
         return self.path
 
     def check_method_and_path(self, method, path):
-        if self.path == "/static/" and os.path.isfile(settings.STATIC_DIR + path):
+        if self.path == '/media/' and os.path.isfile(settings.MEDIA_DIR + path):
+            return True
+        if self.path == '/static/' and os.path.isfile(settings.STATIC_DIR + path):
             return True
         else:
             if re.match(self.path, path) and self.method == method:

@@ -2,6 +2,10 @@ class RouteNotFoundException(Exception):
     pass
 
 
+class PostDoesNotExist(Exception):
+    pass
+
+
 class TemplateError(Exception):
     pass
 

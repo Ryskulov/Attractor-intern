@@ -21,10 +21,10 @@
 				{% end %}
     			<nav class="main__nav">
      				<ul>
-      					<li><a href="#">Home</a></li>
+      					<li><a href="/">Home</a></li>
                         {% if post_edit %}
-      					    <li><a href="{{ link_post_edit }}">Редактирование</a></li>
-      					    <li><a href="{{ link_post_delete }}">Удалить</a></li>
+      					    <li><a href="/post/edit/{{ blog.id }}/">Редактирование</a></li>
+      					    <li><a href="/delete/post/{{ blog.id }}/">Удалить</a></li>
 
                         {% end %}
 
@@ -36,9 +36,9 @@
     <section>
         <div class="container">
             <div class="post__detail">
-                <img src="{{ picture }}" alt="" class="post__img">
-                <span class="post__title">{{ title }}</span>
-                <p class="post__description">{{ description }}</p>
+                <img src="{{ blog.picture }}" alt="" class="post__img">
+                <span class="post__title">{{ blog.title }}</span>
+                <p class="post__description">{{ blog.description }}</p>
             </div>
         </div>
     </section>

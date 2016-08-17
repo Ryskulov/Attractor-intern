@@ -29,7 +29,13 @@
     <section>
         <div class="container">
             <div class="login_box">
-                {{ post_edit }}
+                <form method="POST" action="/update/" class="login__form" enctype="multipart/form-data">
+                    <input type="hidden" value="{{ post.id }}" name="id" class="form__input"/><br/>
+                    <input type="text" value="{{ post.title }}" name="title" class="form__input"/><br/>
+                    <textarea cols="50" rows="10" id="description" name="description" class="form__input">{{ post.description }}</textarea> <br/>
+                    <input type="file" name="picture" class="form__input"/> <br/>
+                    <input type="submit" value="Update" class="form__btn" />
+                </form>
             </div>
         </div>
     </section>

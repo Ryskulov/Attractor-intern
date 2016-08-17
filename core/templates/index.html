@@ -33,8 +33,15 @@
 	</header>
     <section class="blog">
 		<div class="container">
-			{{ blog }}
-
+            {% for blog %}
+            <div class="post__box">
+                <a href="post/{{ it.id }}/" class="post__link">
+                    <img src="{{ it.picture }}" width="250" height="100" alt="" class="post_picture">
+                    <strong>{{ it.title }}</strong>
+                </a>
+                <p class="post__text">{{ it.description }}</p>
+            </div>
+            {% end %}
 		</div>
 	</section>
 	<footer class="footer">

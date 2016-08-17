@@ -4,6 +4,7 @@ from router import Url
 
 patterns = [
     Url(HTTP_METHODS.GET, '/static/', views.static),
+    Url(HTTP_METHODS.GET, '/media/', views.media),
     Url(HTTP_METHODS.GET, '/post/edit/\d+/', views.post_edit_render),
     Url(HTTP_METHODS.POST, '/update/', views.post_edit),
     Url(HTTP_METHODS.GET, '/post/\d+/', views.post_detail),
