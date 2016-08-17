@@ -3,31 +3,29 @@ from exceptions import PostDoesNotExist
 
 
 class User:
-    username = ['admin']
-    password = ['admin']
-    first_name = []
-    email = []
-
-    def create_login(self, username, password, first_name, email):
-        self.username.append(username)
-        self.password.append(password)
-        self.first_name.append(first_name)
-        self.email.append(email)
-        print (self.username)
-
-    def check_user_is_exist(self, username, password):
-        if username in self.username:
-            index_username = self.username.index(username)
-            if self.password[index_username] == password:
-                return True
-        return False
-
-    def __get__(self):
-        return self.username
+    dict_users = [
+        {
+            'username': 'admin',
+            'password': 'admin',
+            'first_name': 'Chingiz',
+            'email': 'chingizkg@gmail.com',
+            'sid': 'bace070115e3514497c547487d543032',
+        },
+        {
+            'username': 'excrat',
+            'password': 'password',
+            'first_name': 'Chingiz',
+            'email': 'chingizkg@gmail.com',
+            'sid': 'bace070115e3514497c547487d543032',
+        },
+    ]
 
 
-class Blog:
-    dict_blog = [
+
+
+
+class Post:
+    dict_posts = [
         {
             'id': 1,
             'title': 'Fully Baked up',
@@ -77,27 +75,37 @@ class DataAccessLayer:
 
     def __init__(self):
         self.user = User()
-        self.blog = Blog()
+        self.blog = Post()
 
     def create_id(self, id=0):
         id += 1
         self.count_for_id[0] += id
         return sum(self.count_for_id)
 
-    def create_user(self, username, password, first_name, email):
-        self.user.create_login(username, password, first_name, email)
+    def create_user(self, username, password, first_name, email, sid):
+        self.user.dict_users.append({
+            'username': username,
+            'password': password,
+            'first_name': first_name,
+            'email': email,
+            'sid': sid,
+        })
+        print(self.user.dict_users)
 
     def check_user_is_exist(self, username, password):
-        return self.user.check_user_is_exist(username, password)
+        for item in self.user.dict_users:
+            if item['username'] == username:
+                if item['password'] == password:
+                    return True
 
     def get_username(self):
         return self.user.username
 
     def get_all_posts(self):
-        return self.blog.dict_blog
+        return self.blog.dict_posts
 
     def create_post(self, id, title, description, picture, sid):
-        self.blog.dict_blog.append({
+        self.blog.dict_posts.append({
             'id': id,
             'title': title,
             'description': description,
@@ -107,13 +115,13 @@ class DataAccessLayer:
         return self.get_post_by_id(id)
 
     def get_post_by_id(self, id):
-        for item in self.blog.dict_blog:
+        for item in self.blog.dict_posts:
             if item['id'] == int(id):
                 return item
         raise PostDoesNotExist()
 
     def update_post_by_id(self, id, title, description, picture):
-        for item in self.blog.dict_blog:
+        for item in self.blog.dict_posts:
             if item['id'] == int(id):
                 item['title'] = title
                 item['description'] = description
@@ -122,7 +130,7 @@ class DataAccessLayer:
         raise PostDoesNotExist()
 
     def delete_post_by_id(self, id):
-        for item in self.blog.dict_blog:
+        for item in self.blog.dict_posts:
             if item['id'] == int(id):
-                self.blog.dict_blog.remove(item)
+                self.blog.dict_posts.remove(item)
         return 'Deleted'

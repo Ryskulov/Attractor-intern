@@ -3,7 +3,7 @@ from http import HTTPStatus
 import settings
 import mimetypes
 import uuid
-from db.database import User, Cookie, Blog, DataAccessLayer
+from db.database import User, Cookie, Post, DataAccessLayer
 from template_code.template import Template, post, Templates, gete_parse_url
 
 
@@ -82,19 +82,21 @@ def signup_render(request):
 
 def signup(request):
     context = {}
-    db = DataAccessLayer()
     user_attribute = post(request)
     username = user_attribute.get('username')
     password = user_attribute.get('password')
     first_name = user_attribute.get('first_name')
     email = user_attribute.get('email')
+    sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, username).hex)
+    db = DataAccessLayer()
     request.send_response(HTTPStatus.SEE_OTHER)
     if not db.check_user_is_exist(username, password):
-        db.create_user(username, password, first_name, email)
+        db.create_user(username, password, first_name, email, sid)
         request.send_header('Location', '/login/')
         print("Create success new login")
     else:
         # request.send_header('Location', '/Error_signup/')
+        request.send_header('Location', '/signup/')
         print("Login don't register")
     request.send_header('Content-Type', 'text/html')
     html = Template('login.html', context).render()
