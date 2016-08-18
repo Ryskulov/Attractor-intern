@@ -29,7 +29,7 @@ class Post:
             'description': 'Curabitur tincidunt dapibus odio, eu gravida felis'
                            'blandit vel.Vivamus feugiat auctor lorem non eleifend.'
                            'Nam eu pellentesque est, vitae interdum nisi.',
-            'picture': '/img/photo1.jpg',
+            'picture': '/uploads/photo1.jpg',
             'sid': 'bace070115e3514497c547487d543032',
         },
         {
@@ -38,7 +38,7 @@ class Post:
             'description': 'Curabitur tincidunt dapibus odio, eu gravida felis'
                            'blandit vel.Vivamus feugiat auctor lorem non eleifend.'
                            'Nam eu pellentesque est, vitae interdum nisi.',
-            'picture': '/img/photo2.jpg',
+            'picture': '/uploads/photo2.jpg',
             'sid': 'bace070115e3514497c547487d543032',
         },
         {
@@ -47,7 +47,7 @@ class Post:
             'description': 'Curabitur tincidunt dapibus odio, eu gravida felis'
                            'blandit vel.Vivamus feugiat auctor lorem non eleifend.'
                            'Nam eu pellentesque est, vitae interdum nisi.',
-            'picture': '/img/photo3.jpg',
+            'picture': '/uploads/photo3.jpg',
             'sid': 'bace070115e3514497c547487d543032',
         }
     ]
