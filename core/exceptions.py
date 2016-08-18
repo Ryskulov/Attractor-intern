@@ -10,6 +10,13 @@ class TemplateError(Exception):
     pass
 
 
+class UsernameIsIncorrect(Exception):
+    pass
+
+class PasswordIsIncorrect(Exception):
+    pass
+
+
 class TemplateContextError(TemplateError):
     def __init__(self, context_var):
         self.context_var = context_var

@@ -4,7 +4,8 @@ import settings
 import mimetypes
 import uuid
 from db.database import User, Cookie, Post, DataAccessLayer
-from template_code.template import Template, post, Templates, gete_parse_url
+from template_code.template import Templates
+from method import method_post
 
 
 def handle_404(request):
@@ -18,30 +19,30 @@ def handle_404(request):
 
 
 def static(request):
+    file_path = request.path
     try:
-        filepath = request.path
-        f = open(settings.STATIC_DIR+request.path, "rb")
+        f = open(settings.STATIC_DIR + request.path, "rb")
     except IOError:
-        request.send_error(404, 'File Not Found: %s ' % filepath)
+        request.send_error(404, 'File Not Found: %s ' % file_path)
     else:
         request.send_response(200)
-        mimetype, _ = mimetypes.guess_type(filepath)
-        request.send_header('Content-type', mimetype)
+        mime_type, _ = mimetypes.guess_type(file_path)
+        request.send_header('Content-type', mime_type)
         request.end_headers()
         for s in f:
             request.wfile.write(s)
 
 
 def media(request):
+    file_path = request.path
     try:
-        filepath = request.path
-        f = open(settings.MEDIA_DIR +request.path, "rb")
+        f = open(settings.MEDIA_DIR + request.path, "rb")
     except IOError:
-        request.send_error(404, 'File Not Found: %s ' % filepath)
+        request.send_error(404, 'File Not Found: %s ' % file_path)
     else:
         request.send_response(200)
-        mimetype, _ = mimetypes.guess_type(filepath)
-        request.send_header('Content-type', mimetype)
+        mime_type, _ = mimetypes.guess_type(file_path)
+        request.send_header('Content-type', mime_type)
         request.end_headers()
         for s in f:
             request.wfile.write(s)
@@ -53,17 +54,14 @@ def index(request):
     request.send_response(HTTPStatus.OK)
     if cookie.cookie_dict.get('session'):
         status = True
-        create_post = True
+        create = True
     else:
         status = False
-        create_post = False
-    f = open(settings.TEMPLATES_DIR + '/index.html')
-    read = f.read()
+        create = False
     post_html = db.get_all_posts()
-    html = Templates(read).render(status=status,
-                                  create_post=create_post,
-                                  blog=post_html
-                                  )
+    html = Templates('index.html').render(
+        status=status, create_post=create, blog=post_html
+    )
     request.send_header('Content-Type', 'text/html')
     request.end_headers()
     request.wfile.write(str.encode(html))
@@ -71,8 +69,7 @@ def index(request):
 
 
 def signup_render(request):
-    context = {}
-    html = Template('register.html', context).render()
+    html = Templates('register.html').render()
     request.send_response(HTTPStatus.OK)
     request.send_header('Content-Type', 'text/html')
     request.end_headers()
@@ -81,12 +78,11 @@ def signup_render(request):
 
 
 def signup(request):
-    context = {}
-    user_attribute = post(request)
-    username = user_attribute.get('username')
-    password = user_attribute.get('password')
-    first_name = user_attribute.get('first_name')
-    email = user_attribute.get('email')
+    user_attribute = method_post(request)
+    username = user_attribute['username']
+    password = user_attribute['password']
+    first_name = user_attribute['first_name']
+    email = user_attribute['email']
     sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, username).hex)
     db = DataAccessLayer()
     request.send_response(HTTPStatus.SEE_OTHER)
@@ -99,16 +95,15 @@ def signup(request):
         request.send_header('Location', '/signup/')
         print("Login don't register")
     request.send_header('Content-Type', 'text/html')
-    html = Template('login.html', context).render()
+    html = Templates('login.html').render()
     request.end_headers()
     request.wfile.write(str.encode(html))
     return request
 
 
 def login_render(request):
-    context = {}
     cookie = Cookie
-    html = Template('login.html', context).render()
+    html = Templates('login.html').render()
     if cookie.cookie_dict.get('session'):
         request.send_response(HTTPStatus.TEMPORARY_REDIRECT)
         request.send_header('Location', '/')
@@ -122,13 +117,11 @@ def login_render(request):
 
 def login(request):
     db = DataAccessLayer()
-    context = {"error": ""}
-    user_attribute = post(request)
-    username = user_attribute.get('username')
-    password = user_attribute.get('password')
+    user_attribute = method_post(request)
+    username = user_attribute['username']
+    password = user_attribute['password']
 
     request.send_response(HTTPStatus.SEE_OTHER)
-    print(username, 'eaedasdadad')
     sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, username).hex)
     if db.check_user_is_exist(username, password):
         cookie = Cookie()
@@ -140,7 +133,7 @@ def login(request):
         request.send_header('Content-Type', 'text/html')
         print("Login Error")
     request.end_headers()
-    html = Template('login.html', context).render()
+    html = Templates('login.html').render()
     request.wfile.write(str.encode(html))
     return request
 
@@ -161,8 +154,6 @@ def logout(request):
 
 def create_post_render(request):
     cookie = Cookie
-    f = open(settings.TEMPLATES_DIR + '/create_post.html')
-    read = f.read()
     if cookie.cookie_dict.get('session'):
         login = True
         request.send_response(HTTPStatus.OK)
@@ -171,7 +162,9 @@ def create_post_render(request):
         login = False
         request.send_response(HTTPStatus.TEMPORARY_REDIRECT)
         request.send_header('Location', '/login/')
-    html = Templates(read).render(login=login)
+    html = Templates('create_post.html').render(
+        login=login
+    )
     request.end_headers()
     request.wfile.write(str.encode(html))
     return request
@@ -181,28 +174,24 @@ def create_post(request):
     db = DataAccessLayer()
     id = db.create_id()
     cookie = Cookie
-    if cookie.cookie_dict.get('session'):
+    if cookie.cookie_dict['session']:
         login = True
     else:
         login = False
-    f = open(settings.TEMPLATES_DIR + '/create_post.html')
-    read = f.read()
-    request.send_response(HTTPStatus.SEE_OTHER)
-    blog_attribute = post(request)
-    title = blog_attribute.get('title')
-    description = blog_attribute.get('description')
+
+    blog_attribute = method_post(request)
+    title = blog_attribute['title']
+    description = blog_attribute['description']
     picture = '/media/uploads/photo%s.jpeg' % id
     f = open('.' + picture, 'w+b')
-    f.write(blog_attribute.get('picture'))
+    f.write(blog_attribute['picture'])
     f.close()
     picture = picture[6:]
-    sid = cookie.cookie_dict.get('session')
-    # begin_blog_length = len(db.get_title_post())
-    db.create_post(id, title, description, picture, sid) #cookie.get_cookie.get('user_auth')
-    # end_blog_length = len(db.get_title_post())
-    # if end_blog_length > begin_blog_length:
+    sid = cookie.cookie_dict['session']
+    db.create_post(id, title, description, picture, sid)
+    html = Templates('create_post.html').render(login=login)
+    request.send_response(HTTPStatus.SEE_OTHER)
     request.send_header('Location', '/')
-    html = Templates(read).render(login=login)
     request.end_headers()
     request.wfile.write(str.encode(html))
     return request
@@ -222,11 +211,9 @@ def post_detail(request):
         post_edit = True
     else:
         post_edit = False
-    f = open(settings.TEMPLATES_DIR + '/post_detail.html')
-    read = f.read()
-    html = Templates(read).render(login=login, post_edit=post_edit,
-                                  blog=post
-                                  )
+    html = Templates('post_detail.html').render(
+        login=login, post_edit=post_edit, blog=post
+    )
     request.send_response(HTTPStatus.OK)
     request.send_header('Content-Type', 'text/html')
     request.end_headers()
@@ -242,9 +229,7 @@ def post_edit_render(request):
 
     sid = post['sid']
     if cookie.cookie_dict.get('session') == sid:
-        f = open(settings.TEMPLATES_DIR + '/post_edit.html')
-        read = f.read()
-        html = Templates(read).render(post=post)
+        html = Templates('post_edit.html').render(post=post)
         request.send_response(HTTPStatus.OK)
         request.send_header('Content-Type', 'text/html')
         request.end_headers()
@@ -257,11 +242,8 @@ def post_edit_render(request):
 
 
 def post_edit(request):
-    context = {}
     db = DataAccessLayer()
-    html = Template('post_edit.html', context).render()
-    request.send_response(HTTPStatus.SEE_OTHER)
-    blog_attribute = post(request)
+    blog_attribute = method_post(request)
     id = blog_attribute.get('id')
     title = blog_attribute.get('title')
     description = blog_attribute.get('description')
@@ -271,6 +253,9 @@ def post_edit(request):
     f.close()
     picture = picture[6:]
     db.update_post_by_id(id, title, description, picture)
+    post = db.get_post_by_id(id)
+    html = Templates('post_edit.html').render(post=post)
+    request.send_response(HTTPStatus.SEE_OTHER)
     request.send_header('Location', '/post/%s/' % id)
     request.end_headers()
     request.wfile.write(str.encode(html))

@@ -1,5 +1,5 @@
 from http.server import BaseHTTPRequestHandler
-
+import cgi
 from router import Router
 from urls import patterns
 
@@ -16,7 +16,6 @@ class MyHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.router.handle(request=self)
-        return
 
     def do_HEAD(self):
         pass

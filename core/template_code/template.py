@@ -37,57 +37,6 @@ operator_lookup_table = {
 }
 
 
-class Template(object):
-    def __init__(self, template_path, context):
-        self.context = dict()
-
-        with open(os.path.join(TEMPLATES_DIR, template_path), 'r') as template_file:
-            self.template = template_file.read()
-
-        for key, value in context.items():
-            if isinstance(value, collections.Iterable):
-                value = ''.join(value)
-            self.context[key] = value
-
-    def render(self):
-        return self.template.format(**self.context)
-
-
-def gete_parse_url(main_url):
-    GET_parametr = []
-    if len(main_url.split("?")) > 1:
-        main_url, url = main_url.split("?")[0], main_url.split("?")[1]
-        result = url.split("&")
-        for i in range(len(result)):
-            GET_parametr.append(str(result[i].split("=")[1]))
-    return main_url, GET_parametr
-
-
-def post(request):
-    ctype, pdict = cgi.parse_header(request.headers['content-type'])
-    if ctype == 'multipart/form-data':
-        postvars = {}
-        pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
-        postvars = cgi.parse_multipart(request.rfile, pdict)
-        user_attribute = dict()
-        if len(postvars):
-            for key in postvars:
-                if key != "picture":
-                    user_attribute[key] = postvars[key][0].decode("utf-8")
-                else:
-                    user_attribute[key] = postvars[key][0]
-        return user_attribute
-    elif ctype == 'application/x-www-form-urlencoded':
-        length = int(request.headers['content-length'])
-        postvars = cgi.parse_qs(request.rfile.read(length), keep_blank_values=1)
-        user_attribute = dict()
-        if len(postvars):
-            for key, value in postvars.items():
-                user_attribute[key.decode("utf-8")] = value[0].decode("utf-8")
-        return user_attribute
-    else:
-        postvars = {}
-
 def eval_expression(expr):
     try:
         return 'literal', ast.literal_eval(expr)
@@ -332,9 +281,12 @@ class Compiler(object):
 
 
 class Templates(object):
-    def __init__(self, contents):
-        self.contents = contents
-        self.root = Compiler(contents).compile()
+    def __init__(self, template_path):
+
+        with open(os.path.join(TEMPLATES_DIR, template_path), 'r') as template_file:
+            self.template = template_file.read()
+
+        self.root = Compiler(self.template).compile()
 
     def render(self, **kwargs):
         return self.root.render(kwargs)

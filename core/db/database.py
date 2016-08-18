@@ -21,9 +21,6 @@ class User:
     ]
 
 
-
-
-
 class Post:
     dict_posts = [
         {
@@ -32,7 +29,7 @@ class Post:
             'description': 'Curabitur tincidunt dapibus odio, eu gravida felis'
                            'blandit vel.Vivamus feugiat auctor lorem non eleifend.'
                            'Nam eu pellentesque est, vitae interdum nisi.',
-            'picture': '/uploads/photo1.jpeg',
+            'picture': '/img/photo1.jpg',
             'sid': 'bace070115e3514497c547487d543032',
         },
         {
@@ -41,7 +38,7 @@ class Post:
             'description': 'Curabitur tincidunt dapibus odio, eu gravida felis'
                            'blandit vel.Vivamus feugiat auctor lorem non eleifend.'
                            'Nam eu pellentesque est, vitae interdum nisi.',
-            'picture': '/uploads/photo1.jpeg',
+            'picture': '/img/photo2.jpg',
             'sid': 'bace070115e3514497c547487d543032',
         },
         {
@@ -50,7 +47,7 @@ class Post:
             'description': 'Curabitur tincidunt dapibus odio, eu gravida felis'
                            'blandit vel.Vivamus feugiat auctor lorem non eleifend.'
                            'Nam eu pellentesque est, vitae interdum nisi.',
-            'picture': '/uploads/photo1.jpeg',
+            'picture': '/img/photo3.jpg',
             'sid': 'bace070115e3514497c547487d543032',
         }
     ]
@@ -97,9 +94,6 @@ class DataAccessLayer:
             if item['username'] == username:
                 if item['password'] == password:
                     return True
-
-    def get_username(self):
-        return self.user.username
 
     def get_all_posts(self):
         return self.blog.dict_posts
