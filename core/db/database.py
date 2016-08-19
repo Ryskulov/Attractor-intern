@@ -65,7 +65,8 @@ class DataAccessLayer:
         self.post = Post()
 
     def create_id(self):
-        self.count_for_id[0] += 1
+        just_one = 1
+        self.count_for_id[0] += just_one
         return sum(self.count_for_id)
 
     def create_user(self, request):

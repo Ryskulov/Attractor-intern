@@ -1,5 +1,5 @@
 from exceptions import RouteNotFoundException
-from views import handle_404
+from handler_methods import handle_404
 import os
 import settings
 import re

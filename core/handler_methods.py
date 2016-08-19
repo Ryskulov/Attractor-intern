@@ -9,8 +9,7 @@ from template_code.template import Templates
 
 
 def handle_404(request):
-    context = {'not-found': 'File Not found'}
-    html = Template('404.html', context).render()
+    html = Templates('404.html').render()
     request.send_response(HTTPStatus.NOT_FOUND)
     request.send_header('Content-Type', 'text/html')
     request.end_headers()
@@ -21,7 +20,7 @@ def handle_404(request):
 def static(request):
     file_path = request.path
     try:
-        f = open(settings.STATIC_DIR + request.path, "rb")
+        file = open(settings.STATIC_DIR + request.path, "rb")
     except IOError:
         request.send_error(404, 'File Not Found: %s ' % file_path)
     else:
@@ -29,14 +28,14 @@ def static(request):
         mime_type, _ = mimetypes.guess_type(file_path)
         request.send_header('Content-type', mime_type)
         request.end_headers()
-        for s in f:
-            request.wfile.write(s)
+        for items in file:
+            request.wfile.write(items)
 
 
 def media(request):
     file_path = request.path
     try:
-        f = open(settings.MEDIA_DIR + request.path, "rb")
+        file = open(settings.MEDIA_DIR + request.path, "rb")
     except IOError:
         request.send_error(404, 'File Not Found: %s ' % file_path)
     else:
@@ -44,12 +43,12 @@ def media(request):
         mime_type, _ = mimetypes.guess_type(file_path)
         request.send_header('Content-type', mime_type)
         request.end_headers()
-        for s in f:
-            request.wfile.write(s)
+        for items in file:
+            request.wfile.write(items)
 
 
 def index(request):
-    db = DataAccessLayer()
+    dal = DataAccessLayer()
     cookie = Cookie
     request.send_response(HTTPStatus.OK)
     if cookie.cookie_dict.get('session'):
@@ -58,7 +57,7 @@ def index(request):
     else:
         status = False
         create = False
-    post_html = db.get_all_posts()
+    post_html = dal.get_all_posts()
     html = Templates('index.html').render(
         status=status, create_post=create, blog=post_html
     )
@@ -78,9 +77,9 @@ def signup_render(request):
 
 
 def signup(request):
-    db = DataAccessLayer()
+    dal = DataAccessLayer()
     request.send_response(HTTPStatus.SEE_OTHER)
-    if db.create_user(request):
+    if dal.create_user(request):
         print("Create success new login")
         request.send_header('Location', '/login/')
     else:
@@ -108,15 +107,13 @@ def login_render(request):
 
 
 def login(request):
-    db = DataAccessLayer()
+    dal = DataAccessLayer()
     user_attribute = method_post(request)
     username = user_attribute['username']
     password = user_attribute['password']
-
     request.send_response(HTTPStatus.SEE_OTHER)
     sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, username).hex)
-
-    if db.check_user_is_exist(username, password):
+    if dal.check_user_is_exist(username, password):
         cookie = Cookie()
         cookie.create_cookie('session', sid)
         request.send_header('Location', '/')
@@ -164,13 +161,13 @@ def create_post_render(request):
 
 
 def create_post(request):
-    db = DataAccessLayer()
+    dal = DataAccessLayer()
     cookie = Cookie
     if cookie.cookie_dict['session']:
         login = True
     else:
         login = False
-    db.create_post(request)
+    dal.create_post(request)
     html = Templates('create_post.html').render(login=login)
     request.send_response(HTTPStatus.SEE_OTHER)
     request.send_header('Location', '/')
@@ -224,7 +221,7 @@ def post_edit_render(request):
 
 
 def post_edit(request):
-    db = DataAccessLayer()
+    dal = DataAccessLayer()
     blog_attribute = method_post(request)
     id = blog_attribute['id']
     title = blog_attribute['title']
@@ -234,9 +231,9 @@ def post_edit(request):
     f.write(blog_attribute['picture'])
     f.close()
     picture = picture[6:]
-    db.update_post_by_id(id=id, title=title,
+    dal.update_post_by_id(id=id, title=title,
                          description=description, picture=picture)
-    post = db.get_post_by_id(id)
+    post = dal.get_post_by_id(id)
     html = Templates('post_edit.html').render(post=post)
     request.send_response(HTTPStatus.SEE_OTHER)
     request.send_header('Location', '/post/%s/' % id)
@@ -246,10 +243,15 @@ def post_edit(request):
 
 
 def post_delete(request):
-    id = request.path.split('/')[-2]
-    db = DataAccessLayer()
-    db.delete_post_by_id(id)
+    id = get_id_from_url(request)
+    dal = DataAccessLayer()
+    dal.delete_post_by_id(id)
     request.send_response(HTTPStatus.SEE_OTHER)
     request.send_header('Location', '/')
     request.end_headers()
     return request
+
+
+def get_id_from_url(request):
+    url_index = -2
+    return int(request.path.split('/')[url_index])

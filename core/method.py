@@ -17,7 +17,6 @@ def method_post(request):
         pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
         postvars = cgi.parse_multipart(request.rfile, pdict)
         user_attribute = dict()
-        print(user_attribute)
         if len(postvars):
             for key in postvars:
                 if key != "picture":
