@@ -1,7 +1,6 @@
-from http.server import BaseHTTPRequestHandler
-import cgi
-from router import Router
 from urls import patterns
+from router import Router
+from http.server import BaseHTTPRequestHandler
 
 
 class MyHandler(BaseHTTPRequestHandler):

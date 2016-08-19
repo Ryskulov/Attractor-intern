@@ -1,5 +1,8 @@
 # coding: utf-8
 from exceptions import PostDoesNotExist
+from method import method_post
+import uuid
+from cookies import Cookie
 
 
 class User:
@@ -53,41 +56,33 @@ class Post:
     ]
 
 
-class Cookie:
-    cookie_dict = {}
-
-    def create_cookie(self, cookie_key, cookie_value):
-        self.cookie_dict[cookie_key] = cookie_value
-
-    def get_cookie(self, cookie_key, cookie_value):
-        self.cookie_dict[cookie_key] = cookie_value
-
-    def __get__(self):
-        return self.cookie_dict
-
-
 class DataAccessLayer:
 
     count_for_id = [3]
 
     def __init__(self):
         self.user = User()
-        self.blog = Post()
+        self.post = Post()
 
-    def create_id(self, id=0):
-        id += 1
-        self.count_for_id[0] += id
+    def create_id(self):
+        self.count_for_id[0] += 1
         return sum(self.count_for_id)
 
-    def create_user(self, username, password, first_name, email, sid):
-        self.user.dict_users.append({
-            'username': username,
-            'password': password,
-            'first_name': first_name,
-            'email': email,
-            'sid': sid,
-        })
-        print(self.user.dict_users)
+    def create_user(self, request):
+        character_length = 2
+        user_attr = method_post(request)
+        sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, user_attr['username']).hex)
+        if len(user_attr['username']) >= character_length:
+            for item in self.user.dict_users:
+                if item['username'] != user_attr['username']:
+                    self.user.dict_users.append({
+                        'username': user_attr['username'],
+                        'password': user_attr['password'],
+                        'first_name': user_attr['first_name'],
+                        'email': user_attr['email'],
+                        'sid': sid,
+                    })
+            return True
 
     def check_user_is_exist(self, username, password):
         for item in self.user.dict_users:
@@ -96,35 +91,44 @@ class DataAccessLayer:
                     return True
 
     def get_all_posts(self):
-        return self.blog.dict_posts
+        return self.post.dict_posts
 
-    def create_post(self, id, title, description, picture, sid):
-        self.blog.dict_posts.append({
+    def create_post(self, request):
+        id = self.create_id()
+        blog_attr = method_post(request)
+        picture = '/media/uploads/photo%s.jpeg' % id
+        f = open('.' + picture, 'w+b')
+        f.write(blog_attr['picture'])
+        f.close()
+        picture = picture[6:]
+        cookie = Cookie
+        sid = cookie.cookie_dict['session']
+        self.post.dict_posts.append({
             'id': id,
-            'title': title,
-            'description': description,
+            'title': blog_attr['title'],
+            'description': blog_attr['description'],
             'picture': picture,
             'sid': sid
         })
         return self.get_post_by_id(id)
 
     def get_post_by_id(self, id):
-        for item in self.blog.dict_posts:
+        for item in self.post.dict_posts:
             if item['id'] == int(id):
                 return item
         raise PostDoesNotExist()
 
-    def update_post_by_id(self, id, title, description, picture):
-        for item in self.blog.dict_posts:
-            if item['id'] == int(id):
-                item['title'] = title
-                item['description'] = description
-                item['picture'] = picture
+    def update_post_by_id(self, **kwargs):
+        for item in self.post.dict_posts:
+            if item['id'] == int(kwargs['id']):
+                item['title'] = kwargs['title']
+                item['description'] = kwargs['description']
+                item['picture'] = kwargs['picture']
                 return item
         raise PostDoesNotExist()
 
     def delete_post_by_id(self, id):
-        for item in self.blog.dict_posts:
+        for item in self.post.dict_posts:
             if item['id'] == int(id):
-                self.blog.dict_posts.remove(item)
+                self.post.dict_posts.remove(item)
         return 'Deleted'

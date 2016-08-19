@@ -1,11 +1,11 @@
-from http import HTTPStatus
-
+import uuid
 import settings
 import mimetypes
-import uuid
-from db.database import User, Cookie, Post, DataAccessLayer
-from template_code.template import Templates
+from http import HTTPStatus
+from cookies import Cookie
 from method import method_post
+from db.database import DataAccessLayer
+from template_code.template import Templates
 
 
 def handle_404(request):
@@ -78,20 +78,12 @@ def signup_render(request):
 
 
 def signup(request):
-    user_attribute = method_post(request)
-    username = user_attribute['username']
-    password = user_attribute['password']
-    first_name = user_attribute['first_name']
-    email = user_attribute['email']
-    sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, username).hex)
     db = DataAccessLayer()
     request.send_response(HTTPStatus.SEE_OTHER)
-    if not db.check_user_is_exist(username, password):
-        db.create_user(username, password, first_name, email, sid)
-        request.send_header('Location', '/login/')
+    if db.create_user(request):
         print("Create success new login")
+        request.send_header('Location', '/login/')
     else:
-        # request.send_header('Location', '/Error_signup/')
         request.send_header('Location', '/signup/')
         print("Login don't register")
     request.send_header('Content-Type', 'text/html')
@@ -123,6 +115,7 @@ def login(request):
 
     request.send_response(HTTPStatus.SEE_OTHER)
     sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, username).hex)
+
     if db.check_user_is_exist(username, password):
         cookie = Cookie()
         cookie.create_cookie('session', sid)
@@ -172,23 +165,12 @@ def create_post_render(request):
 
 def create_post(request):
     db = DataAccessLayer()
-    id = db.create_id()
     cookie = Cookie
     if cookie.cookie_dict['session']:
         login = True
     else:
         login = False
-
-    blog_attribute = method_post(request)
-    title = blog_attribute['title']
-    description = blog_attribute['description']
-    picture = '/media/uploads/photo%s.jpeg' % id
-    f = open('.' + picture, 'w+b')
-    f.write(blog_attribute['picture'])
-    f.close()
-    picture = picture[6:]
-    sid = cookie.cookie_dict['session']
-    db.create_post(id, title, description, picture, sid)
+    db.create_post(request)
     html = Templates('create_post.html').render(login=login)
     request.send_response(HTTPStatus.SEE_OTHER)
     request.send_header('Location', '/')
@@ -244,15 +226,16 @@ def post_edit_render(request):
 def post_edit(request):
     db = DataAccessLayer()
     blog_attribute = method_post(request)
-    id = blog_attribute.get('id')
-    title = blog_attribute.get('title')
-    description = blog_attribute.get('description')
+    id = blog_attribute['id']
+    title = blog_attribute['title']
+    description = blog_attribute['description']
     picture = '/media/uploads/photo%s.jpeg' % id
     f = open('.' + picture, 'w+b')
-    f.write(blog_attribute.get('picture'))
+    f.write(blog_attribute['picture'])
     f.close()
     picture = picture[6:]
-    db.update_post_by_id(id, title, description, picture)
+    db.update_post_by_id(id=id, title=title,
+                         description=description, picture=picture)
     post = db.get_post_by_id(id)
     html = Templates('post_edit.html').render(post=post)
     request.send_response(HTTPStatus.SEE_OTHER)
