@@ -78,8 +78,16 @@ def signup_render(request):
 
 def signup(request):
     dal = DataAccessLayer()
+    user_attr = method_post(request)
+    sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, user_attr['username']).hex)
+    username = user_attr['username']
+    password = user_attr['password']
+    email = user_attr['email']
+    first_name = user_attr['first_name']
     request.send_response(HTTPStatus.SEE_OTHER)
-    if dal.create_user(request):
+    if dal.create_user(username=username, password=password,
+                       email=email, first_name=first_name,
+                       sid=sid):
         print("Create success new login")
         request.send_header('Location', '/login/')
     else:
@@ -109,6 +117,7 @@ def login_render(request):
 def login(request):
     dal = DataAccessLayer()
     user_attribute = method_post(request)
+
     username = user_attribute['username']
     password = user_attribute['password']
     request.send_response(HTTPStatus.SEE_OTHER)
@@ -162,12 +171,23 @@ def create_post_render(request):
 
 def create_post(request):
     dal = DataAccessLayer()
+    id = int(dal.create_id())
     cookie = Cookie
+    blog_attr = method_post(request)
+    picture = '/media/uploads/photo%s.jpeg' % id
+    f = open('.' + picture, 'w+b')
+    f.write(blog_attr['picture'])
+    f.close()
+    title = blog_attr['title']
+    description = blog_attr['description']
+    picture = picture[6:]
+    sid = cookie.cookie_dict['session']
+    dal.create_post(id=id, title=title, description=description,
+                    sid=sid, picture=picture)
     if cookie.cookie_dict['session']:
         login = True
     else:
         login = False
-    dal.create_post(request)
     html = Templates('create_post.html').render(login=login)
     request.send_response(HTTPStatus.SEE_OTHER)
     request.send_header('Location', '/')

@@ -69,19 +69,17 @@ class DataAccessLayer:
         self.count_for_id[0] += just_one
         return sum(self.count_for_id)
 
-    def create_user(self, request):
+    def create_user(self, **kwargs):
         login_length = 2
-        user_attr = method_post(request)
-        sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, user_attr['username']).hex)
-        if len(user_attr['username']) >= login_length:
+        if len(kwargs['username']) >= login_length:
             for item in self.user.dict_users:
-                if item['username'] != user_attr['username']:
+                if item['username'] != kwargs['username']:
                     self.user.dict_users.append({
-                        'username': user_attr['username'],
-                        'password': user_attr['password'],
-                        'first_name': user_attr['first_name'],
-                        'email': user_attr['email'],
-                        'sid': sid,
+                        'username': kwargs['username'],
+                        'password': kwargs['password'],
+                        'first_name': kwargs['first_name'],
+                        'email': kwargs['email'],
+                        'sid': kwargs['sid'],
                     })
             return True
 
@@ -94,24 +92,16 @@ class DataAccessLayer:
     def get_all_posts(self):
         return self.post.dict_posts
 
-    def create_post(self, request):
-        id = self.create_id()
-        blog_attr = method_post(request)
-        picture = '/media/uploads/photo%s.jpeg' % id
-        f = open('.' + picture, 'w+b')
-        f.write(blog_attr['picture'])
-        f.close()
-        picture = picture[6:]
-        cookie = Cookie
-        sid = cookie.cookie_dict['session']
+    def create_post(self, **kwargs):
+
         self.post.dict_posts.append({
-            'id': id,
-            'title': blog_attr['title'],
-            'description': blog_attr['description'],
-            'picture': picture,
-            'sid': sid
+            'id': kwargs['id'],
+            'title': kwargs['title'],
+            'description': kwargs['description'],
+            'picture': kwargs['picture'],
+            'sid': kwargs['sid']
         })
-        return self.get_post_by_id(id)
+        return self.get_post_by_id(kwargs['id'])
 
     def get_post_by_id(self, id):
         for item in self.post.dict_posts:
