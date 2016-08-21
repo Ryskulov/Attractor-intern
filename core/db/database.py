@@ -70,10 +70,10 @@ class DataAccessLayer:
         return sum(self.count_for_id)
 
     def create_user(self, request):
-        character_length = 2
+        login_length = 2
         user_attr = method_post(request)
         sid = str(uuid.uuid5(uuid.NAMESPACE_DNS, user_attr['username']).hex)
-        if len(user_attr['username']) >= character_length:
+        if len(user_attr['username']) >= login_length:
             for item in self.user.dict_users:
                 if item['username'] != user_attr['username']:
                     self.user.dict_users.append({
