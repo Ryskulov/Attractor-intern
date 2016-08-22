@@ -71,7 +71,6 @@ class TestDataAccessLayer(unittest.TestCase):
 
     def test_get_post_by_id(self):
         self.dal.get_post_by_id(2)
-        print(self.dal.get_post_by_id(2))
         self.assertEqual(self.dal.post.dict_posts[1], {
             'id': 2,
             'title': 'Fully Title blog',

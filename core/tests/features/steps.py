@@ -3,8 +3,8 @@ from lettuce import step, world
 
 @step(r'Open "(.*)" page')
 def open_page(step, page):
-    world.current_page = world.mapping[page] # взять url искомой страницы
-    world.browser.get(world.current_page['url']) # открыть этот url в браузере
+    world.current_page = world.mapping[page]
+    world.browser.get(world.current_page['url'])
 
 
 @step(r'Fill "(.*)" with "(.*)"')

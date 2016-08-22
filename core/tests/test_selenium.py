@@ -11,7 +11,7 @@ SID = str(uuid.uuid4().hex)
 class TestSelenium(unittest.TestCase):
 
     def setUp(self):
-        self.pid_server = subprocess.Popen('python server.py', shell=True)
+        self.pid_server = subprocess.Popen('python3 server.py', shell=True)
         self.dal = DataAccessLayer()
         self.driver = webdriver.Firefox()
 
@@ -42,7 +42,6 @@ class TestSelenium(unittest.TestCase):
         login_button = self.driver.find_element_by_class_name('form__btn')
         login_button.click()
 
-
     def tearDown(self):
         self.driver.close()
         self.pid_server.kill()
@@ -50,28 +49,3 @@ class TestSelenium(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
-
-
-
-
-
-# class PythonOrgSearch(unittest.TestCase):
-#     def setUp(self):
-#         self.driver = webdriver.Firefox()
-#         self.db = DataAccessLayer()
-#
-#     def test_authenticated_user(self):
-#
-#
-#
-#         btn_go = self.driver.find_element_by_css_selector('a[href="/admin/"]')
-#         btn_go.click()
-
-#         btn_login = self.driver.find_element_by_css_selector('input[type="submit"]')
-#         btn_login.click()
-#         # def tearDown(self):
-#         #     self.driver.close()
