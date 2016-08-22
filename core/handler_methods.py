@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import uuid
 import settings
 import mimetypes
@@ -252,7 +254,7 @@ def post_edit(request):
     f.close()
     picture = picture[6:]
     dal.update_post_by_id(id=id, title=title,
-                         description=description, picture=picture)
+                          description=description, picture=picture)
     post = dal.get_post_by_id(id)
     html = Templates('post_edit.html').render(post=post)
     request.send_response(HTTPStatus.SEE_OTHER)

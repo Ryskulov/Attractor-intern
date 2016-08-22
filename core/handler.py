@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from urls import patterns
 from router import Router
 from http.server import BaseHTTPRequestHandler
